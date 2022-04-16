@@ -3,17 +3,17 @@ const express = require("express"); /*traigo express*/
 const cors = require("cors"); /* Traigo CORS. Se necesita por un tema de seguridad en los navegadores */
 const { response } = require("express");
 
-/*Inicializo en la variable api */
+/*Inicializo Express en la variable api */
 const api = express();
 
-/*Habilitar CORS*/
+//Habilitar CORS. Necesario por un tema de seguridad
 api.use(cors()); /*En Prod hay que ser mas especifico */
 
 //Middleware
-api.use((req, res, next) => { //si le saco el '/*' se ejecuta siempre, o sea es global
+/*api.use((req, res, next) => { //si le saco el '/*' se ejecuta siempre, o sea es global
     console.log("Entro al middleware");
     next();
-});
+});*/
 
 //Info FAKE 
 //TODO: Traer los datos de la BBDD
@@ -22,15 +22,37 @@ const productos = [
     { id: 2, codigo: "FLO400", imagen: "servilleta2.jpg", origen: "China", tamaño: "30x30", cantidad: "250", precio: "15" },
     { id: 3, codigo: "ANI400", imagen: "servilleta3.jpg", origen: "China", tamaño: "30x30", cantidad: "120", precio: "15" },
     { id: 4, codigo: "ANI500", imagen: "servilleta4.jpg", origen: "China", tamaño: "30x30", cantidad: "200", precio: "15" }
-
 ];
 
+const promociones = [
+    { id: 1, texto: "Promocion de Febrero !!!" },
+    { id: 2, texto: "Promocion de Marzo !!!" },
+    { id: 3, texto: "Promocion de Abril !!!" }
+];
+
+const usuarios = [
+    { id: 1, nombre: "Joaquin", apellido: "Pedrozo", email: "joaquin.pedrozo@gmail.com", clave: "1234" },
+    { id: 2, nombre: "Gustavo", apellido: "Rodriguez", email: "gustavo.rodriguez@gmail.com", clave: "1234" },
+    { id: 3, nombre: "Senpai", apellido: "Senpai", email: "Senpai.academy@gmail.com", clave: "1234" }
+];
+
+const categorias = [
+    { id: 1, nombre: "COCINA,FRUTAS Y VERDURAS" },
+    { id: 2, nombre: "FLORES" },
+    { id: 3, nombre: "ANIMALES Y INSECTOS" },
+    { id: 4, nombre: "VINTAGE" },
+    { id: 5, nombre: "NAVIDAD" },
+    { id: 6, nombre: "HOJAS" },
+    { id: 7, nombre: "ARABESCOS Y PUNTOS" }
+];
+// -------------------------------FIN INFO FAKE ---------------------------------------------------
+
+/*ENDPOINTS */
 /*Le digo que escuche en / en el verbo get y agrego la respuesta(callback) -ENDPOINT
 Los endpoints son las llegadas desde la UI. 
 Se tiene que tener en cuenta el orden porque la prioridad es de arriba hacia abajo*/
 
-/*ENDPOINTS */
-/*servilletas de la home*/
+// Manejador de ruta productos de la home
 api.get('/productos', (req, res) => {
     try {
         let size = req.query.size; //este es un parametro opcional
@@ -45,6 +67,7 @@ api.get('/productos', (req, res) => {
     }
 });
 
+// Manejador de ruta detalle producto
 api.get('/producto/:productoId', (req, res) => {
     try {
         let resultado = null; //declaro null para la busqueda y luego validar
@@ -87,7 +110,7 @@ api.get('/producto/:productoId', (req, res) => {
     }
 });
 
-/*Agregar Servilleta al Pedido */
+//// Manejador de ruta agregar producto a pedido
 api.post('/pedido-agregar', (req, res) => {
     try {
         //agregar la servilleta al pedido
@@ -98,6 +121,65 @@ api.post('/pedido-agregar', (req, res) => {
     }
 });
 
+// Manejador de ruta promociones de la Home
+api.get('/promociones/:promocionID', (req, res) => {
+    try {
+        let resultado = null; //declaro null para la busqueda y luego validar        
+        const promocionID = req.params.promocionID; //Obtengo el id del producto
+
+        //Valido que el id sea numerico.
+        if (isNaN(promocionID)) {
+            res.statusCode = 400;
+            res.send({
+                error: "El ID debe ser numerico.",
+            });
+            return; //debe estar para cortar. Sino devuelve ok y da dos return y se crashea
+        } else {
+            //Busco el productoID en el Array, Luego en la BBDD.
+            //uso foreach que es un metodo que tienen los arrays.
+            promociones.forEach((promocion) => {
+                if (promocion.id == promocionID) {
+                    resultado = promocion;
+                };
+            });
+        };
+
+        //Valido que el resultado no este vacio o nulo.
+        if (resultado === null) {
+            res.statusCode = 404;
+            res.send({
+                error: "Error al traer la promocion o promocion no existe.",
+            });
+            return; //debe estar para cortar. Sino devuelve ok y da dos return y se crashea
+        }
+
+        //Respondo lo encontrado
+        res.send(resultado);
+
+    } catch (error) {
+        res.send({
+            mensaje: "Ocurrio un error",
+        });
+    }
+});
+
+// Manejador de ruta categorias NavBar
+api.get('/categorias', (req, res) => {
+    try {
+        let size = req.query.size; //este es un parametro opcional
+        if (size == undefined) { //sino me pasan un size, el valor por defecto es 4
+            size = 7;
+        }
+        res.send(categorias.slice(0, size)); //TODO: Esto va a cambiar al conectarme a la BBDD
+    } catch (error) {
+        res.send({
+            mensaje: "Ocurrio un error",
+        });
+    }
+});
+//------------------FIN ZONA ENDPOINRS---------------------------------------------
+
+//--------- MANEJO DE ERRORES -----------------------------------------------------
 //Manejador para errores. Esta siempre va al final
 api.get('/*', (req, res) => {
     try {
@@ -120,7 +202,7 @@ api.use((error, req, res, next) => {
     //next();
 });
 
-/*------------------FIN ZONA ENDPOINRS--------------------------------------------- */
+/*------------------FIN MANEJADORES DE ERRORES--------------------------------------------- */
 
 /*Queda escuchando el puerto 4000 */
 api.listen(4000, () => {
