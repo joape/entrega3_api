@@ -1,0 +1,28 @@
+{
+    "name": "entrega3_api",
+    "version": "1.0.0",
+    "description": "Mi api para la ui de decoupage_web",
+    "main": "src/index.js",
+    "scripts": {
+        "start": "nodemon src/index.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/joape/entrega3_api.git"
+    },
+    "keywords": [
+        "servilletas",
+        "decoupage",
+        "artesanias"
+    ],
+    "author": "Joaquin Pedrozo",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/joape/entrega3_api/issues"
+    },
+    "homepage": "https://github.com/joape/entrega3_api#readme",
+    "dependencies": {
+        "cors": "^2.8.5",
+        "express": "^4.17.3"
+    }
+}
