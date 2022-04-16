@@ -1,7 +1,9 @@
 /*Requiero las libreria*/
 const express = require("express"); /*traigo express*/
-const cors = require("cors"); /* Traigo CORS. Se necesita por un tema de seguridad en los navegadores */
-const { response } = require("express");
+const cors = require("cors"); // Traigo CORS. Se necesita por un tema de seguridad en los navegadores
+const { response } = require("express"); //lo uso para responder desde los manejadores de ruta
+const bodyParser = require("body-parser"); //la uso para poder interpretar los post de la UI
+const fs = require("fs"); //la uso para el logger global del middleware
 
 /*Inicializo Express en la variable api */
 const api = express();
@@ -9,11 +11,21 @@ const api = express();
 //Habilitar CORS. Necesario por un tema de seguridad
 api.use(cors()); /*En Prod hay que ser mas especifico */
 
-//Middleware
-/*api.use((req, res, next) => { //si le saco el '/*' se ejecuta siempre, o sea es global
-    console.log("Entro al middleware");
+//MIDDLEWARES
+//Middleware GLOBAL
+api.use((req, res, next) => { //si le saco el '/*' se ejecuta siempre, o sea es global
+    const log = `Ingreso a:${req.url} a las ${new Date()}`; //genero la linea  
+    fs.writeFile('./data/log.txt', log, error => { //aca grabo y saco por consola si todo estuvo ok o paso algo.
+            if (error)
+                console.log(error)
+            else
+                console.log('El archivo fue creado')
+        })
+        //console.log(log); //chequeo que entra
     next();
-});*/
+});
+
+// ------------FIN ZONA DE MIDDLEWARE ---------------------------------------------------
 
 //Info FAKE 
 //TODO: Traer los datos de la BBDD
@@ -47,7 +59,7 @@ const categorias = [
 ];
 // -------------------------------FIN INFO FAKE ---------------------------------------------------
 
-/*ENDPOINTS */
+//ENDPOINTS 
 /*Le digo que escuche en / en el verbo get y agrego la respuesta(callback) -ENDPOINT
 Los endpoints son las llegadas desde la UI. 
 Se tiene que tener en cuenta el orden porque la prioridad es de arriba hacia abajo*/
@@ -110,8 +122,34 @@ api.get('/producto/:productoId', (req, res) => {
     }
 });
 
-//// Manejador de ruta agregar producto a pedido
+// Manejador de ruta agregar producto a pedido
 api.post('/pedido-agregar', (req, res) => {
+    try {
+        //agregar la servilleta al pedido
+    } catch (error) {
+        res.send({
+            mensaje: "Ocurrio un error",
+        });
+    }
+});
+
+// Manejador de ruta formulario Contacto
+api.post('/contacto', (req, res) => {
+    try {
+        const datos = req.body;
+        console.log(datos);
+
+        response.send("ok");
+
+    } catch (error) {
+        res.send({
+            mensaje: "Ocurrio un error",
+        });
+    }
+});
+
+// Manejador de ruta Login
+api.post('/login', (req, res) => {
     try {
         //agregar la servilleta al pedido
     } catch (error) {
