@@ -8,8 +8,10 @@ const fs = require("fs"); //la uso para el logger global del middleware
 /*Inicializo Express en la variable api */
 const api = express();
 
-//Requiero los Routers
+//Requiero los Routers propios
 const productosRouter = require('./routers/productos.router');
+const categoriasRouter = require('./routers/categorias.router');
+const promocionesRouter = require('./routers/promociones.router');
 
 //MIDDLEWARES
 //Habilitar CORS. Necesario por un tema de seguridad
@@ -34,11 +36,6 @@ api.use(bodyParser.json()); //Lo tengo para tener la opcion de recibir JSON
 
 //Info FAKE 
 //TODO: Traer los datos de la BBDD
-const promociones = [
-    { id: 1, texto: "Promocion de Febrero !!!" },
-    { id: 2, texto: "Promocion de Marzo !!!" },
-    { id: 3, texto: "Promocion de Abril !!!" }
-];
 
 const usuarios = [
     { id: 1, nombre: "Joaquin", apellido: "Pedrozo", email: "joaquin.pedrozo@gmail.com", clave: "1234" },
@@ -46,15 +43,6 @@ const usuarios = [
     { id: 3, nombre: "Senpai", apellido: "Senpai", email: "Senpai.academy@gmail.com", clave: "1234" }
 ];
 
-const categorias = [
-    { id: 1, nombre: "COCINA,FRUTAS Y VERDURAS" },
-    { id: 2, nombre: "FLORES" },
-    { id: 3, nombre: "ANIMALES Y INSECTOS" },
-    { id: 4, nombre: "VINTAGE" },
-    { id: 5, nombre: "NAVIDAD" },
-    { id: 6, nombre: "HOJAS" },
-    { id: 7, nombre: "ARABESCOS Y PUNTOS" }
-];
 // -------------------------------FIN INFO FAKE ---------------------------------------------------
 
 //ENDPOINTS 
@@ -62,11 +50,10 @@ const categorias = [
 Los endpoints son las llegadas desde la UI. 
 Se tiene que tener en cuenta el orden porque la prioridad es de arriba hacia abajo*/
 
-
-
-
 //Usamos los Routers
 api.use("/productos", productosRouter);
+api.use("/categorias", categoriasRouter);
+api.use("/promociones", promocionesRouter);
 
 // Manejador de ruta agregar producto a pedido
 api.post('/pedido-agregar', (req, res) => {
@@ -78,8 +65,6 @@ api.post('/pedido-agregar', (req, res) => {
         });
     }
 });
-
-
 
 // Manejador de ruta formulario Contacto
 api.post('/usuarios', (req, res) => {
@@ -106,68 +91,6 @@ api.post('/login', (req, res) => {
         });
     }
 });
-
-// Manejador de ruta promociones de la Home
-api.get('/promociones/:promocionID', (req, res) => {
-    try {
-        let resultado = null; //declaro null para la busqueda y luego validar        
-        const promocionID = req.params.promocionID; //Obtengo el id del producto
-
-        //Valido que el id sea numerico.
-        if (isNaN(promocionID)) {
-            res.statusCode = 400;
-            res.send({
-                error: "El ID debe ser numerico.",
-            });
-            return; //debe estar para cortar. Sino devuelve ok y da dos return y se crashea
-        } else {
-            //Busco el productoID en el Array, Luego en la BBDD.
-            //uso foreach que es un metodo que tienen los arrays.
-            promociones.forEach((promocion) => {
-                if (promocion.id == promocionID) {
-                    resultado = promocion;
-                };
-            });
-        };
-
-        //Valido que el resultado no este vacio o nulo.
-        if (resultado === null) {
-            res.statusCode = 404;
-            res.send({
-                error: "Error al traer la promocion o promocion no existe.",
-            });
-            return; //debe estar para cortar. Sino devuelve ok y da dos return y se crashea
-        }
-
-        //Respondo lo encontrado
-        res.send(resultado);
-
-    } catch (error) {
-        res.send({
-            mensaje: "Ocurrio un error",
-        });
-    }
-});
-
-// Manejador de ruta categorias NavBar
-const CategoriasRouter = express.Router();
-
-CategoriasRouter.get('/', (req, res) => {
-    try {
-        let size = req.query.size; //este es un parametro opcional
-        if (size == undefined) { //sino me pasan un size, el valor por defecto es 4
-            size = 7;
-        }
-        res.send(categorias.slice(0, size)); //TODO: Esto va a cambiar al conectarme a la BBDD
-    } catch (error) {
-        res.send({
-            mensaje: "Ocurrio un error",
-        });
-    }
-});
-
-api.use("/categorias", CategoriasRouter);
-
 //------------------FIN ZONA ENDPOINRS---------------------------------------------
 
 //--------- MANEJO DE ERRORES -----------------------------------------------------

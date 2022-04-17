@@ -11,8 +11,7 @@ const productos = [
     { id: 4, codigo: "ANI500", imagen: "servilleta4.jpg", origen: "China", tamaño: "30x30", cantidad: "200", precio: "15" }
 ];
 
-
-const ProductosRouter = express.Router();
+const ProductosRouter = express.Router(); //declaro la variable para usar el router de Express
 
 // Manejador de ruta productos GET
 ProductosRouter.get('/', (req, res) => {
@@ -72,4 +71,4 @@ ProductosRouter.get('/:productoId', (req, res) => {
     }
 });
 
-module.exports = ProductosRouter;
+module.exports = ProductosRouter; //lo que expongo para afuera
