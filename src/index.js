@@ -8,12 +8,17 @@ const fs = require("fs"); //la uso para el logger global del middleware
 /*Inicializo Express en la variable api */
 const api = express();
 
-//Habilitar CORS. Necesario por un tema de seguridad
-api.use(cors()); /*En Prod hay que ser mas especifico */
+//Requiero los Routers
+const productosRouter = require('./routers/productos.router');
 
 //MIDDLEWARES
+//Habilitar CORS. Necesario por un tema de seguridad
+api.use(cors()); /*En Prod hay que ser mas especifico */
+api.use(bodyParser.urlencoded({ extended: false }));
+api.use(bodyParser.json()); //Lo tengo para tener la opcion de recibir JSON
+
 //Middleware GLOBAL
-api.use((req, res, next) => { //si le saco el '/*' se ejecuta siempre, o sea es global
+/*api.use((req, res, next) => { //si le saco el '/*' se ejecuta siempre, o sea es global
     const log = `Ingreso a:${req.url} a las ${new Date()}`; //genero la linea  
     fs.writeFile('./data/log.txt', log, error => { //aca grabo y saco por consola si todo estuvo ok o paso algo.
             if (error)
@@ -23,19 +28,12 @@ api.use((req, res, next) => { //si le saco el '/*' se ejecuta siempre, o sea es 
         })
         //console.log(log); //chequeo que entra
     next();
-});
+});*/
 
 // ------------FIN ZONA DE MIDDLEWARE ---------------------------------------------------
 
 //Info FAKE 
 //TODO: Traer los datos de la BBDD
-const productos = [
-    { id: 1, codigo: "INS400", imagen: "servilleta1.jpg", origen: "China", tamaño: "30x30", cantidad: "320", precio: "15" },
-    { id: 2, codigo: "FLO400", imagen: "servilleta2.jpg", origen: "China", tamaño: "30x30", cantidad: "250", precio: "15" },
-    { id: 3, codigo: "ANI400", imagen: "servilleta3.jpg", origen: "China", tamaño: "30x30", cantidad: "120", precio: "15" },
-    { id: 4, codigo: "ANI500", imagen: "servilleta4.jpg", origen: "China", tamaño: "30x30", cantidad: "200", precio: "15" }
-];
-
 const promociones = [
     { id: 1, texto: "Promocion de Febrero !!!" },
     { id: 2, texto: "Promocion de Marzo !!!" },
@@ -64,63 +62,11 @@ const categorias = [
 Los endpoints son las llegadas desde la UI. 
 Se tiene que tener en cuenta el orden porque la prioridad es de arriba hacia abajo*/
 
-// Manejador de ruta productos de la home
-api.get('/productos', (req, res) => {
-    try {
-        let size = req.query.size; //este es un parametro opcional
-        if (size == undefined) { //sino me pasan un size, el valor por defecto es 4
-            size = 4;
-        }
-        res.send(productos.slice(0, size));
-    } catch (error) {
-        res.send({
-            mensaje: "Ocurrio un error",
-        });
-    }
-});
 
-// Manejador de ruta detalle producto
-api.get('/producto/:productoId', (req, res) => {
-    try {
-        let resultado = null; //declaro null para la busqueda y luego validar
 
-        //Primero obtengo el id del producto
-        const productoID = req.params.productoId;
 
-        //Valido que el id sea numerico.
-        if (isNaN(productoID)) {
-            res.statusCode = 400;
-            res.send({
-                error: "El ID debe ser numerico.",
-            });
-            return; //debe estar para cortar. Sino devuelve ok y da dos return y se crashea
-        } else {
-            //Busco el productoID en el Array, Luego en la BBDD.
-            //uso foreach que es un metodo que tienen los arrays.
-            productos.forEach((producto) => {
-                if (producto.id == productoID) {
-                    resultado = producto;
-                };
-            });
-        };
-
-        //Valido que el resultado no este vacio o nulo.
-        if (resultado === null) {
-            res.statusCode = 404;
-            res.send({
-                error: "Error al traer el producto o producto no existe.",
-            });
-            return; //debe estar para cortar. Sino devuelve ok y da dos return y se crashea
-        }
-
-        //Respondo lo encontrado
-        res.send(resultado);
-    } catch (error) {
-        res.send({
-            mensaje: "Ocurrio un error",
-        });
-    }
-});
+//Usamos los Routers
+api.use("/productos", productosRouter);
 
 // Manejador de ruta agregar producto a pedido
 api.post('/pedido-agregar', (req, res) => {
@@ -133,17 +79,19 @@ api.post('/pedido-agregar', (req, res) => {
     }
 });
 
+
+
 // Manejador de ruta formulario Contacto
-api.post('/contacto', (req, res) => {
+api.post('/usuarios', (req, res) => {
     try {
         const datos = req.body;
-        console.log(datos);
-
-        response.send("ok");
+        //console.log(datos);
+        res.send("ok");
 
     } catch (error) {
+        res.statusCode = 400;
         res.send({
-            mensaje: "Ocurrio un error",
+            mensaje: "Ocurrio un error:" + error,
         });
     }
 });
@@ -202,7 +150,9 @@ api.get('/promociones/:promocionID', (req, res) => {
 });
 
 // Manejador de ruta categorias NavBar
-api.get('/categorias', (req, res) => {
+const CategoriasRouter = express.Router();
+
+CategoriasRouter.get('/', (req, res) => {
     try {
         let size = req.query.size; //este es un parametro opcional
         if (size == undefined) { //sino me pasan un size, el valor por defecto es 4
@@ -215,6 +165,9 @@ api.get('/categorias', (req, res) => {
         });
     }
 });
+
+api.use("/categorias", CategoriasRouter);
+
 //------------------FIN ZONA ENDPOINRS---------------------------------------------
 
 //--------- MANEJO DE ERRORES -----------------------------------------------------
