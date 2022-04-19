@@ -52,7 +52,7 @@ api.post('/pedido-agregar', (req, res) => {
 });
 
 // TODO:Manejador de ruta formulario Contacto
-api.post('/usuarios', (req, res) => {
+api.post('/contacto', (req, res) => {
     try {
         const datos = req.body;
         //console.log(datos);
@@ -66,16 +66,6 @@ api.post('/usuarios', (req, res) => {
     }
 });
 
-// TODO: Manejador de ruta Login
-api.post('/login', (req, res) => {
-    try {
-        //agregar la servilleta al pedido
-    } catch (error) {
-        res.send({
-            mensaje: "Ocurrio un error",
-        });
-    }
-});
 //------------------FIN ZONA ENDPOINRS---------------------------------------------
 
 //--------- MIDDLEWARE MANEJO DE ERRORES -----------------------------------------------------

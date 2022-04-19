@@ -13,7 +13,8 @@ const promociones = [
 const PromocionesRouter = express.Router(); //declaro la variable para usar el router de Express
 
 // Manejador de ruta GET de Promociones de la Home
-PromocionesRouter.get('/:promocionID', authMiddleware, (req, res) => {
+//PromocionesRouter.get('/:promocionID', authMiddleware, (req, res) => {
+PromocionesRouter.get('/:promocionID', (req, res) => {
     try {
         let resultado = null; //declaro null para la busqueda y luego validar        
         const promocionID = req.params.promocionID; //Obtengo el id del producto

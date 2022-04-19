@@ -36,7 +36,7 @@ authRouter.post('/login', async(req, res) => {
         //Controlo si la password es correcta
         const esigualPassword = await bcrypt.compare(password, usuario.clave); //aca comparo las pass
         if (!esigualPassword) { //respondo mensaje de error
-            res.send({ error: "La password es incorrecta", });
+            res.status(400).send({ error: "La password es incorrecta", });
             return;
         };
 
