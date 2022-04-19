@@ -4,7 +4,10 @@ const cors = require("cors"); // Traigo CORS. Se necesita por un tema de segurid
 const { response } = require("express"); //lo uso para responder desde los manejadores de ruta
 const bodyParser = require("body-parser"); //la uso para poder interpretar los post de la UI
 
-/*Inicializo Express en la variable api */
+//Variables de Entorno
+require("dotenv").config();
+
+//Inicializo Express en la variable api 
 const api = express();
 
 //Requiero los Routers propios
