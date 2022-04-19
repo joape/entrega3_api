@@ -29,7 +29,6 @@ api.use(bodyParser.json()); //Lo tengo para tener la opcion de recibir JSON
 
 //Middleware GLOBAL
 api.use(loggerMiddleware);
-
 // ----------------------FIN ZONA DE MIDDLEWARE ---------------------------------------------------
 
 //-----------------------ENDPOINTS ----------------------------------------------------------------
@@ -68,17 +67,15 @@ api.post('/contacto', (req, res) => {
         });
     }
 });
+//------------------FIN ZONA ENDPOINRS------------------------------------------------------
 
-//------------------FIN ZONA ENDPOINRS---------------------------------------------
-
-//--------- MIDDLEWARE MANEJO DE ERRORES -----------------------------------------------------
+//--------- MIDDLEWARE MANEJO DE ERRORES ---------------------------------------------------
 //Manejador para errores. Esta siempre va al final
 api.all('/*', notfoundMiddleware);
 //Piso el manejador de errors de Express para que no muestre info interna
 //Si estoy en desarrollo ejecuto el next para que lo agarre express y me muestre el error.
 //api.use(errorsMiddleware); //comentar cuando se esta en desarrollo
-
-/*------------------FIN MANEJADORES DE ERRORES--------------------------------------------- */
+//------------------FIN MANEJADORES DE ERRORES--------------------------------------------- 
 
 /*Queda escuchando el puerto 4000 */
 api.listen(4000, () => {
