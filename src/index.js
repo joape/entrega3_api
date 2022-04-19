@@ -11,6 +11,7 @@ const api = express();
 const productosRouter = require('./routers/productos.router');
 const categoriasRouter = require('./routers/categorias.router');
 const promocionesRouter = require('./routers/promociones.router');
+const authRouter = require('./routers/auth.router');
 
 //Requiero los Middlewares propios
 const loggerMiddleware = require('./middlewares/logger.middleware');
@@ -26,20 +27,9 @@ api.use(bodyParser.json()); //Lo tengo para tener la opcion de recibir JSON
 //Middleware GLOBAL
 api.use(loggerMiddleware);
 
-// ------------FIN ZONA DE MIDDLEWARE ---------------------------------------------------
+// ----------------------FIN ZONA DE MIDDLEWARE ---------------------------------------------------
 
-//Info FAKE -------------------------------------------------------------------------------
-//TODO: Traer los datos de la BBDD
-
-const usuarios = [
-    { id: 1, nombre: "Joaquin", apellido: "Pedrozo", email: "joaquin.pedrozo@gmail.com", clave: "1234" },
-    { id: 2, nombre: "Gustavo", apellido: "Rodriguez", email: "gustavo.rodriguez@gmail.com", clave: "1234" },
-    { id: 3, nombre: "Senpai", apellido: "Senpai", email: "Senpai.academy@gmail.com", clave: "1234" }
-];
-
-// -------------------------------FIN INFO FAKE ---------------------------------------------------
-
-//ENDPOINTS ---------------------------------------------------------------------------------
+//-----------------------ENDPOINTS ----------------------------------------------------------------
 /*Le digo que escuche en / en el verbo get y agrego la respuesta(callback) -ENDPOINT
 Los endpoints son las llegadas desde la UI. 
 Se tiene que tener en cuenta el orden porque la prioridad es de arriba hacia abajo*/
@@ -48,6 +38,7 @@ Se tiene que tener en cuenta el orden porque la prioridad es de arriba hacia aba
 api.use("/productos", productosRouter);
 api.use("/categorias", categoriasRouter);
 api.use("/promociones", promocionesRouter);
+api.use("/auth", authRouter);
 
 // TODO: Manejador de ruta agregar producto a pedido
 api.post('/pedido-agregar', (req, res) => {
@@ -92,7 +83,7 @@ api.post('/login', (req, res) => {
 api.all('/*', notfoundMiddleware);
 //Piso el manejador de errors de Express para que no muestre info interna
 //Si estoy en desarrollo ejecuto el next para que lo agarre express y me muestre el error.
-api.use(errorsMiddleware);
+//api.use(errorsMiddleware); //comentar cuando se esta en desarrollo
 
 /*------------------FIN MANEJADORES DE ERRORES--------------------------------------------- */
 

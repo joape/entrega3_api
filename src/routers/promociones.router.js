@@ -1,5 +1,6 @@
 /*Requiero las libreria*/
 const express = require("express"); /*traigo express*/
+const { authMiddleware } = require('./../middlewares/auth.middleware'); //Selecciono solo authMiddleware del objeto
 
 //Info FAKE 
 //TODO: Traer los datos de la BBDD
@@ -12,7 +13,7 @@ const promociones = [
 const PromocionesRouter = express.Router(); //declaro la variable para usar el router de Express
 
 // Manejador de ruta GET de Promociones de la Home
-PromocionesRouter.get('/:promocionID', (req, res) => {
+PromocionesRouter.get('/:promocionID', authMiddleware, (req, res) => {
     try {
         let resultado = null; //declaro null para la busqueda y luego validar        
         const promocionID = req.params.promocionID; //Obtengo el id del producto
@@ -48,7 +49,7 @@ PromocionesRouter.get('/:promocionID', (req, res) => {
 
     } catch (error) {
         res.send({
-            mensaje: "Ocurrio un error",
+            mensaje: error,
         });
     }
 });
