@@ -1,6 +1,7 @@
 /*Requiero las libreria*/
 const express = require("express"); /*traigo express*/
 const db = require("../configs/db");
+const Producto = require("../models/producto");
 
 const ProductosRouter = express.Router(); //declaro la variable para usar el router de Express
 
@@ -12,11 +13,13 @@ ProductosRouter.get('/', async(req, res) => {
             size = 4;
         }
 
-        const responseBD = await db.query('select * from productos');
-        const productos = responseBD.rows;
+        //const responseBD = await db.query('select * from productos');
+        //const productos = responseBD.rows;
+        const productos = await Producto.findAll();
         return res.send(productos);
 
     } catch (error) {
+        res.statusCode = 404;
         res.send({
             mensaje: "Ocurrio un error al traer los productos",
         });
@@ -40,8 +43,13 @@ ProductosRouter.get('/:productoId', async(req, res) => {
             return; //debe estar para cortar. Sino devuelve ok y da dos return y se crashea
         } else {
 
-            const responseBD = await db.query('select * from productos where id_producto=$1', [productoID]);
-            const resultado = responseBD.rows[0];
+            //const responseBD = await db.query('select * from productos where id_producto=$1', [productoID]);
+            //const resultado = responseBD.rows[0];
+            const resultado = await Producto.findOne({
+                where: {
+                    id_producto: productoID,
+                },
+            });
 
             //Valido que el resultado no este vacio o nulo.
             if (!resultado) {
@@ -54,12 +62,8 @@ ProductosRouter.get('/:productoId', async(req, res) => {
 
             return res.send(resultado);
         };
-
-
-
-        //Respondo lo encontrado
-        //res.send(resultado);
     } catch (error) {
+        res.statusCode = 404;
         res.send({
             mensaje: "Ocurrio un error",
         });
