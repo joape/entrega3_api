@@ -32,6 +32,9 @@ const Producto = db.define(
             type: Sequelize.DOUBLE,
         },
         imagen: {
+            type: Sequelize.STRING(100),
+        },
+        imagen_original: {
             type: Sequelize.STRING(50),
         },
         date_add: {

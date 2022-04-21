@@ -18,7 +18,7 @@ const Usuario = db.define(
             type: Sequelize.STRING(100),
         },
         clave: {
-            type: Sequelize.STRING(12),
+            type: Sequelize.STRING,
         },
         admin: {
             type: Sequelize.INTEGER,

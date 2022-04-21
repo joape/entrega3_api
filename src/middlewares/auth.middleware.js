@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 const JWT_SECRET = "joaquin";
 
 const authMiddleware = (req, res, next) => {
-    const token = req.header('Authorization');
+    const token = req.header('Authorization'); //Aca lo va a recibir de la API de la UI.
 
     //Si no me mandan un Token, mando un mensaje de error 401 Acceso denegado
     if (!token) {

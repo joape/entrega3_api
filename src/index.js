@@ -28,7 +28,7 @@ api.use(bodyParser.urlencoded({ extended: false }));
 api.use(bodyParser.json()); //Lo tengo para tener la opcion de recibir JSON
 
 //Middleware GLOBAL
-api.use(loggerMiddleware);
+//api.use(loggerMiddleware);
 // ----------------------FIN ZONA DE MIDDLEWARE ---------------------------------------------------
 
 //-----------------------ENDPOINTS ----------------------------------------------------------------
