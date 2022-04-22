@@ -3,6 +3,7 @@ const authRouter = express.Router();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = require('./../middlewares/auth.middleware'); //Selecciono solo JWT_SECRET del objeto
+const Usuario = require("../models/usuario"); //Con esto puedo usar la BBDD
 
 //clave encriptada (1234 de Joaquin Pedrozo) $2b$10$f3WEsFGPP5LbthrsDJPLO.AYDSIiViTM2AFkkMpxNfxG1TOXJ4zjO
 const usuarios = [
@@ -14,27 +15,24 @@ const usuarios = [
 //Creamos el Router
 authRouter.post('/login', async(req, res) => {
     try {
-        const email = req.body.email;
+        const email = req.body.email.toUpperCase();
         const password = req.body.password;
 
-        //Codigo para generar un hash con mi clave - SE USA EN EL REGISTRO Y CAMBIO DE PASS
-        //const salt = await bcrypt.genSalt(10); //Peso de 10 (encrypta 10 veces)
-        //const hash = await bcrypt.hash(password, salt);
-
-        //console.log(email, password, hash);
-
-        //Arranco la validacion del usuario. Busco si existe.
-        const usuario = usuarios.find((usuarioBD) => {
-            return usuarioBD.email === email;
+        const emailEncontrado = await Usuario.findOne({
+            where: {
+                email: email,
+            },
         });
-        //Sino existe el usuario
-        if (!usuario) {
-            res.status(400).send({ error: "El usuario no existe", });
-            return;
-        };
+        //console.log(emailEncontrado);
+
+        //Valido que el resultado no este vacio o nulo.
+        if (!emailEncontrado) {
+            res.status(400).send({ error: "El email ingresado no existe", });
+            return; //debe estar para cortar. Sino devuelve ok y da dos return y se crashea
+        }
 
         //Controlo si la password es correcta
-        const esigualPassword = await bcrypt.compare(password, usuario.clave); //aca comparo las pass
+        const esigualPassword = await bcrypt.compare(password, emailEncontrado.clave); //aca comparo las pass
         if (!esigualPassword) { //respondo mensaje de error
             res.status(400).send({ error: "La password es incorrecta", });
             return;
@@ -43,7 +41,7 @@ authRouter.post('/login', async(req, res) => {
         //Si todo salio bien
         //Creo el token
         const token = jwt.sign({
-            email: usuario.email
+            email: emailEncontrado.email
         }, JWT_SECRET);
         //console.log(token);
 
@@ -51,8 +49,10 @@ authRouter.post('/login', async(req, res) => {
         res.send({ error: null, message: "LOGIN CORRECTO!", token });
 
     } catch (error) {
+        res.statusCode = 404;
         res.send({
-            mensaje: "Ocurrio un error",
+            mensaje: "Ocurrio un Error",
+            error: error
         });
     }
 });

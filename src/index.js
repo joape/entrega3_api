@@ -12,6 +12,7 @@ const api = express();
 
 //Requiero los Routers propios
 const productosRouter = require('./routers/productos.router');
+const usuariosRouter = require('./routers/usuarios.router');
 const categoriasRouter = require('./routers/categorias.router');
 const promocionesRouter = require('./routers/promociones.router');
 const authRouter = require('./routers/auth.router');
@@ -38,6 +39,7 @@ Se tiene que tener en cuenta el orden porque la prioridad es de arriba hacia aba
 
 //Usamos los Routers
 api.use("/productos", productosRouter);
+api.use("/usuarios", usuariosRouter);
 api.use("/categorias", categoriasRouter);
 api.use("/promociones", promocionesRouter);
 api.use("/auth", authRouter);
