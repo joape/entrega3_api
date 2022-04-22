@@ -5,13 +5,6 @@ const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = require('./../middlewares/auth.middleware'); //Selecciono solo JWT_SECRET del objeto
 const Usuario = require("../models/usuario"); //Con esto puedo usar la BBDD
 
-//clave encriptada (1234 de Joaquin Pedrozo) $2b$10$f3WEsFGPP5LbthrsDJPLO.AYDSIiViTM2AFkkMpxNfxG1TOXJ4zjO
-const usuarios = [
-    { id: 1, nombre: "Joaquin", apellido: "Pedrozo", email: "joaquin.pedrozo@gmail.com", clave: "$2b$10$f3WEsFGPP5LbthrsDJPLO.AYDSIiViTM2AFkkMpxNfxG1TOXJ4zjO" },
-    { id: 2, nombre: "Gustavo", apellido: "Rodriguez", email: "gustavo.rodriguez@gmail.com", clave: "1234" },
-    { id: 3, nombre: "Senpai", apellido: "Senpai", email: "Senpai.academy@gmail.com", clave: "1234" }
-];
-
 //Creamos el Router
 authRouter.post('/login', async(req, res) => {
     try {
