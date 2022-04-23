@@ -39,7 +39,7 @@ authRouter.post('/login', async(req, res) => {
         //console.log(token);
 
         //Login Exitoso
-        res.send({ error: null, message: "LOGIN CORRECTO!", token });
+        res.send({ error: null, message: "LOGIN CORRECTO!", token, admin: emailEncontrado.admin });
 
     } catch (error) {
         res.statusCode = 404;

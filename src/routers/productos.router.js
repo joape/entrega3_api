@@ -1,13 +1,16 @@
 //Requiero las libreria
 const express = require("express"); //traigo express
-const db = require("../configs/db"); //lo necesito para usar la BBDD
+//const db = require("../configs/db"); //lo necesito para usar la BBDD
 const multer = require("multer"); //lo necesito para subir la foto de los productos
 const path = require("path"); //lo necesito por el tema de las direcciones de los archivos
+const { authMiddleware } = require("../middlewares/auth.middleware");
 const Producto = require("../models/producto");
 const ProductosRouter = express.Router(); //declaro la variable para usar el router de Express
+const fs = require("fs/promises");
 
 //Configuramos multer
-const uploadMiddleware = multer({ dest: path.join("public", "uploads") });
+const dirpath = path.join("public", "uploads");
+const uploadMiddleware = multer({ dest: dirpath });
 
 // Manejador de ruta productos GET
 ProductosRouter.get('/', async(req, res) => {
@@ -76,7 +79,7 @@ ProductosRouter.get('/:productoId', async(req, res) => {
     }
 });
 
-ProductosRouter.post('/', uploadMiddleware.single("foto"), async(req, res) => {
+ProductosRouter.post('/', authMiddleware, uploadMiddleware.single("foto"), async(req, res) => {
     try {
 
         //Capturo los datos de la imagen
@@ -159,4 +162,57 @@ ProductosRouter.post('/', uploadMiddleware.single("foto"), async(req, res) => {
 
 });
 
+ProductosRouter.delete("/:productoId", authMiddleware, async(req, res) => {
+    try {
+        //Primero obtengo el id del producto
+        const productoID = req.params.productoId;
+        //valido que sea admin
+        if (req.user.admin != 1) {
+            res.statusCode = 401;
+            res.send({
+                error: "El usuario no es Admin.",
+            });
+            return; //debe estar para cortar. Sino devuelve ok y da dos return y se crashea
+        }
+
+        //Valido que el id sea numerico.
+        if (isNaN(productoID)) {
+            res.statusCode = 400;
+            res.send({
+                error: "El ID debe ser numerico.",
+            });
+            return; //debe estar para cortar. Sino devuelve ok y da dos return y se crashea
+        } else {
+
+            const producto = await Producto.findOne({
+                where: {
+                    id_producto: productoID,
+                },
+            });
+
+            //Valido que el resultado no este vacio o nulo.
+            if (!producto) {
+                res.statusCode = 404;
+                res.send({
+                    error: "Error al borrar el producto.",
+                });
+                return; //debe estar para cortar. Sino devuelve ok y da dos return y se crashea
+            }
+
+            //borro la imagen
+            //console.log(path.join(dirpath, producto.imagen))
+            await fs.unlink(path.join(dirpath, producto.imagen));
+
+            //borro registro
+            await producto.destroy();
+
+
+
+
+            return res.send();
+        };
+    } catch (error) {
+
+    }
+});
 module.exports = ProductosRouter; //lo que expongo para afuera

@@ -1,8 +1,8 @@
 /*Requiero las libreria*/
 const express = require("express"); /*traigo express*/
 const cors = require("cors"); // Traigo CORS. Se necesita por un tema de seguridad en los navegadores
-const { response } = require("express"); //lo uso para responder desde los manejadores de ruta
 const bodyParser = require("body-parser"); //la uso para poder interpretar los post de la UI
+const path = require("path"); //lo necesito por el tema de las direcciones de los archivos
 
 //Variables de Entorno
 require("dotenv").config();
@@ -18,9 +18,9 @@ const promocionesRouter = require('./routers/promociones.router');
 const authRouter = require('./routers/auth.router');
 
 //Requiero los Middlewares propios
-const loggerMiddleware = require('./middlewares/logger.middleware');
+const loggerMiddleware = require('./middlewares/logger.middleware'); //se ven mas oscuro porque mas abajo estan comentado su uso
 const notfoundMiddleware = require('./middlewares/not-found.middleware');
-const errorsMiddleware = require('./middlewares/errors.middleware');
+const errorsMiddleware = require('./middlewares/errors.middleware'); // idem logger
 
 //MIDDLEWARES
 //Habilitar CORS y middlewares externos. CORS es necesario por un tema de seguridad
@@ -28,14 +28,16 @@ api.use(cors()); /*En Prod hay que ser mas especifico */
 api.use(bodyParser.urlencoded({ extended: false }));
 api.use(bodyParser.json()); //Lo tengo para tener la opcion de recibir JSON
 
+//Habilito acceso a las imagenes en Public
+api.use(express.static(path.join(__dirname, "..", "public"))); // Es necesario para que se muestren las imagenes de los prods subidos en la UI
+
 //Middleware GLOBAL
 //api.use(loggerMiddleware);
 // ----------------------FIN ZONA DE MIDDLEWARE ---------------------------------------------------
 
 //-----------------------ENDPOINTS ----------------------------------------------------------------
-/*Le digo que escuche en / en el verbo get y agrego la respuesta(callback) -ENDPOINT
-Los endpoints son las llegadas desde la UI. 
-Se tiene que tener en cuenta el orden porque la prioridad es de arriba hacia abajo*/
+//Los endpoints son las llegadas desde la UI. 
+//Se tiene que tener en cuenta el orden porque la prioridad es de arriba hacia abajo
 
 //Usamos los Routers
 api.use("/productos", productosRouter);
