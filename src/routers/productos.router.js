@@ -79,6 +79,49 @@ ProductosRouter.get('/:productoId', async(req, res) => {
     }
 });
 
+//Manejador de ruta GET con ID para buscar por categoria
+ProductosRouter.get('/categorias/:categoriaId', async(req, res) => {
+    try {
+        let resultado = null; //declaro null para la busqueda y luego validar
+
+        //Primero obtengo el id de la categoria
+        const categoriaID = req.params.categoriaId;
+        // console.log(categoriaID);
+        //Valido que el id sea numerico.
+        if (isNaN(categoriaID)) {
+            res.statusCode = 400;
+            res.send({
+                error: "El ID debe ser numerico.",
+            });
+            return; //debe estar para cortar. Sino devuelve ok y da dos return y se crashea
+        } else {
+
+            const resultado = await Producto.findAll({
+                where: {
+                    id_categoria: categoriaID,
+                },
+            });
+
+            //Valido que el resultado no este vacio o nulo.
+            if (!resultado) {
+                res.statusCode = 404;
+                res.send({
+                    error: "Error al traer la categoria o categoria no existe.",
+                });
+                return; //debe estar para cortar. Sino devuelve ok y da dos return y se crashea
+            }
+
+            return res.send(resultado);
+        };
+    } catch (error) {
+        res.statusCode = 404;
+        res.send({
+            mensaje: "Ocurrio un error",
+        });
+    }
+});
+
+// Manejador de ruta POST
 ProductosRouter.post('/', authMiddleware, uploadMiddleware.single("foto"), async(req, res) => {
     try {
 
@@ -158,14 +201,113 @@ ProductosRouter.post('/', authMiddleware, uploadMiddleware.single("foto"), async
             error: error
         });
     }
-
-
 });
 
+// TODO: Manejador de ruta PUT con ID
+ProductosRouter.put('/:productoID', authMiddleware, uploadMiddleware.single("foto"), async(req, res) => {
+    try {
+        console.log("Hola");
+        //valido que sea admin
+        if (req.user.admin != 1) {
+            res.statusCode = 401;
+            res.send({
+                error: "El usuario no es Admin.",
+            });
+            return; //debe estar para cortar. Sino devuelve ok y da dos return y se crashea
+        }
+
+        //Obtengo el id del producto
+        const productoID = req.params.productoID;
+
+        //Valido que el id sea numerico.
+        if (isNaN(productoID)) {
+            res.statusCode = 400;
+            res.send({
+                error: "El ID debe ser numerico.",
+            });
+            return; //debe estar para cortar. Sino devuelve ok y da dos return y se crashea
+        }
+
+        //Capturo datos de la imagen
+        const originalFileName = req.file ? req.file.originalname : null;
+        const filename = req.file ? req.file.filename : null;
+        //console.log(originalFileName, filename);
+
+        // valido este campo por las dudas que seleccionen vacio
+        if (!req.body.id_categoria) {
+            return res.json({
+                sucess: false,
+                message: "Falta el id_categoria"
+            });
+        }
+
+        if (filename) { //Si filename NO es vacio, significa que subio foto
+
+            const producto = await Producto.findOne({ //Busco la imagen fisica para borrarla.
+                where: {
+                    id_producto: productoID,
+                },
+            });
+
+            //Valido que el resultado no este vacio o nulo.
+            if (!producto) {
+                res.statusCode = 406;
+                res.send({
+                    error: "Error al intentar actualizar el producto.",
+                });
+                return; //debe estar para cortar. Sino devuelve ok y da dos return y se crashea
+            }
+
+            //borro la imagen
+            //console.log(path.join(dirpath, producto.imagen))
+            await fs.unlink(path.join(dirpath, producto.imagen));
+        }
+
+        //genero el JSON para pasar a la BBDD
+        const datos = {
+            id_categoria: req.body.id_categoria,
+            codigo: req.body.codigo,
+            origen: req.body.origen,
+            tamaño: req.body.tamaño,
+            stock: req.body.stock,
+            precio: req.body.precio
+        };
+
+        if (filename) {
+            datos['imagen'] = filename;
+        }
+
+        if (originalFileName) {
+            datos['imagen_original'] = originalFileName;
+        }
+
+        console.log(datos);
+        //Disparo el update a la BBDD
+        const resultado = await Producto.update(datos, {
+            where: {
+                id_producto: productoID,
+            }
+        });
+        //console.log(resultado);
+
+        res.send({ message: "Producto correctamente actualizado", datos });
+
+    } catch (error) {
+        console.log(error);
+        res.statusCode = 405;
+        res.send({
+            mensaje: "Error al tratar de actualizar el producto en la BBDD",
+            error: error
+        });
+    }
+});
+
+// Manejador de ruta DELETE con ID
 ProductosRouter.delete("/:productoId", authMiddleware, async(req, res) => {
     try {
         //Primero obtengo el id del producto
         const productoID = req.params.productoId;
+
         //valido que sea admin
         if (req.user.admin != 1) {
             res.statusCode = 401;
@@ -194,7 +336,7 @@ ProductosRouter.delete("/:productoId", authMiddleware, async(req, res) => {
             if (!producto) {
                 res.statusCode = 404;
                 res.send({
-                    error: "Error al borrar el producto.",
+                    error: "Error al intentar borrar el producto.",
                 });
                 return; //debe estar para cortar. Sino devuelve ok y da dos return y se crashea
             }
@@ -206,13 +348,15 @@ ProductosRouter.delete("/:productoId", authMiddleware, async(req, res) => {
             //borro registro
             await producto.destroy();
 
-
-
-
             return res.send();
         };
     } catch (error) {
-
+        res.statusCode = 404;
+        res.send({
+            mensaje: "Error al tratar de borrar el producto en la BBDD",
+            error: error
+        });
     }
 });
+
 module.exports = ProductosRouter; //lo que expongo para afuera
